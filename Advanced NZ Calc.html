@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Advanced NZ Parliament Majority Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 100%;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        .party {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .party strong {
+            flex: 1;
+            text-align: left;
+        }
+        .party div {
+            display: flex;
+            gap: 10px;
+            flex: 2;
+            justify-content: center;
+        }
+        .party label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        select, input {
+            font-size: 16px;
+            padding: 5px;
+            width: 60px;
+            text-align: center;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .majority {
+            background-color: green;
+            color: white;
+        }
+        .opposed {
+            background-color: red;
+            color: white;
+        }
+        .neutral {
+            background-color: gray;
+            color: white;
+        }
+        #footer {
+            margin-top: 30px;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Advanced NZ Parliament Majority Calculator</h2>
+        <p>Distribute votes for each party among Yes, No, and Abstain:</p>
+    
+        <div id="parties"></div>
+    
+        <div id="result" class="neutral">Total Votes: 0 (No Majority)</div>
+    </div>
+    
+    <div id="footer">
+        Created by <a href="https://www.marcusganley.com/about" target="_blank">Marcus Ganley</a> with ChatGPT 4o
+    </div>
+    
+    <script>
+        const parties = [
+            { name: "National", votes: 49 },
+            { name: "ACT", votes: 11 },
+            { name: "NZ First", votes: 8 },
+            { name: "Labour", votes: 34 },
+            { name: "Green", votes: 15 },
+            { name: "Māori", votes: 6 }
+        ];
+        
+        function generateParties() {
+            const container = document.getElementById("parties");
+            parties.forEach(party => {
+                const div = document.createElement("div");
+                div.className = "party";
+                div.innerHTML = `
+                    <strong>${party.name} (${party.votes} votes)</strong>
+                    <div>
+                        <label>Yes<input type="number" class="yes" data-votes="${party.votes}" min="0" max="${party.votes}" value="0" onchange="calculateMajority()"></label>
+                        <label>No<input type="number" class="no" data-votes="${party.votes}" min="0" max="${party.votes}" value="0" onchange="calculateMajority()"></label>
+                        <label>Abstain<input type="number" class="abstain" data-votes="${party.votes}" min="0" max="${party.votes}" value="${party.votes}" onchange="calculateMajority()"></label>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function calculateMajority() {
+            let yesVotes = 0;
+            let noVotes = 0;
+            
+            document.querySelectorAll(".party").forEach(partyDiv => {
+                const maxVotes = parseInt(partyDiv.querySelector(".yes").dataset.votes);
+                let yes = parseInt(partyDiv.querySelector(".yes").value) || 0;
+                let no = parseInt(partyDiv.querySelector(".no").value) || 0;
+                let abstain = parseInt(partyDiv.querySelector(".abstain").value) || 0;
+                
+                if (yes + no + abstain > maxVotes) {
+                    abstain = maxVotes - yes - no;
+                    partyDiv.querySelector(".abstain").value = abstain;
+                }
+                
+                yesVotes += yes;
+                noVotes += no;
+            });
+            
+            const resultElement = document.getElementById("result");
+            let resultText = `Yes Votes: ${yesVotes}, No Votes: ${noVotes} `;
+            
+            if (yesVotes > noVotes) {
+                resultText += "(Motion Passes)";
+                resultElement.className = "majority";
+            } else if (noVotes > yesVotes) {
+                resultText += "(Motion Fails)";
+                resultElement.className = "opposed";
+            } else {
+                resultText += "(Tie - Motion Fails)";
+                resultElement.className = "neutral";
+            }
+            
+            resultElement.innerText = resultText;
+        }
+        
+        document.addEventListener("DOMContentLoaded", generateParties);
+    </script>
+</body>
+</html>
