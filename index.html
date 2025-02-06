@@ -129,16 +129,10 @@
             let totalAllocated = yes + no + abstain;
             
             if (totalAllocated > maxVotes) {
-                let excess = totalAllocated - maxVotes;
                 if (input === yesInput || input === noInput) {
-                    abstainInput.value = Math.max(0, abstain - excess);
-                } else if (input === abstainInput) {
-                    if (yes + no > maxVotes) {
-                        abstainInput.value = 0;
-                    } else {
-                        abstainInput.value = maxVotes - (yes + no);
-                    }
+                    abstainInput.value = Math.max(0, abstain - (totalAllocated - maxVotes));
                 }
+                input.value = Math.min(input.value, maxVotes - (yes + no + abstain) + parseInt(input.value));
             }
             calculateMajority();
         }
