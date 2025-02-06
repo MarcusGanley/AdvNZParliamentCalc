@@ -106,13 +106,27 @@
                 div.innerHTML = `
                     <strong>${party.name} (${party.votes} votes)</strong>
                     <div>
-                        <label>Yes<input type="number" class="yes" data-votes="${party.votes}" min="0" max="${party.votes}" value="0" onchange="calculateMajority()"></label>
-                        <label>No<input type="number" class="no" data-votes="${party.votes}" min="0" max="${party.votes}" value="0" onchange="calculateMajority()"></label>
-                        <label>Abstain<input type="number" class="abstain" data-votes="${party.votes}" min="0" max="${party.votes}" value="${party.votes}" onchange="calculateMajority()"></label>
+                        <label>Yes<input type="number" class="yes" data-votes="${party.votes}" min="0" max="${party.votes}" value="0" onchange="validateVotes(this)"></label>
+                        <label>No<input type="number" class="no" data-votes="${party.votes}" min="0" max="${party.votes}" value="0" onchange="validateVotes(this)"></label>
+                        <label>Abstain<input type="number" class="abstain" data-votes="${party.votes}" min="0" max="${party.votes}" value="${party.votes}" onchange="validateVotes(this)"></label>
                     </div>
                 `;
                 container.appendChild(div);
             });
+        }
+        
+        function validateVotes(input) {
+            const partyDiv = input.closest(".party");
+            const maxVotes = parseInt(input.dataset.votes);
+            let yes = parseInt(partyDiv.querySelector(".yes").value) || 0;
+            let no = parseInt(partyDiv.querySelector(".no").value) || 0;
+            let abstain = parseInt(partyDiv.querySelector(".abstain").value) || 0;
+            
+            if (yes + no + abstain > maxVotes) {
+                const availableVotes = maxVotes - (yes + no + abstain - parseInt(input.value));
+                input.value = Math.max(0, availableVotes);
+            }
+            calculateMajority();
         }
         
         function calculateMajority() {
@@ -120,15 +134,8 @@
             let noVotes = 0;
             
             document.querySelectorAll(".party").forEach(partyDiv => {
-                const maxVotes = parseInt(partyDiv.querySelector(".yes").dataset.votes);
                 let yes = parseInt(partyDiv.querySelector(".yes").value) || 0;
                 let no = parseInt(partyDiv.querySelector(".no").value) || 0;
-                let abstain = parseInt(partyDiv.querySelector(".abstain").value) || 0;
-                
-                if (yes + no + abstain > maxVotes) {
-                    abstain = maxVotes - yes - no;
-                    partyDiv.querySelector(".abstain").value = abstain;
-                }
                 
                 yesVotes += yes;
                 noVotes += no;
